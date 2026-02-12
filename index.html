@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WOLF LABS | XOS Structural Command Center</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-deep: #050505;
+            --structural-red: #e74c3c;
+            --structural-red-dim: rgba(231, 76, 60, 0.15);
+            --white: #FFFFFF;
+            --gray-sub: #666666;
+            --glass: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        /* --- SOFTWARE VIEWPORT LOCK --- */
+        body, html {
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            background-color: var(--bg-deep);
+            color: var(--white);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; 
+        }
+
+        .font-display { font-family: 'Montserrat', sans-serif; }
+        .font-mono { font-family: 'Fira Code', monospace; }
+
+        /* --- SIDEBAR DESIGN --- */
+        .sidebar {
+            width: 280px;
+            background: #080808;
+            border-right: 1px solid var(--glass-border);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 24px;
+            position: relative;
+            z-index: 50;
+        }
+
+        .sidebar::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 25%;
+            height: 50%;
+            width: 3px;
+            background-color: var(--structural-red);
+            box-shadow: 0 0 15px var(--structural-red);
+            border-radius: 10px 0 0 10px;
+        }
+
+        .nav-item {
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--gray-sub);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: var(--glass);
+            color: var(--white);
+        }
+
+        .nav-item.active {
+            color: var(--structural-red);
+            background: var(--structural-red-dim);
+            box-shadow: inset 0 0 10px rgba(231, 76, 60, 0.05);
+        }
+
+        /* --- MAIN VIEWPORT --- */
+        .main-viewport {
+            flex: 1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: radial-gradient(circle at 90% 10%, #1a0505 0%, #050505 60%);
+        }
+
+        .content-scrollable {
+            flex: 1;
+            overflow-y: auto;
+            padding: 60px 100px 120px; 
+            scrollbar-width: thin;
+            scrollbar-color: #222 transparent;
+        }
+
+        /* --- UI COMPONENTS --- */
+        .pill {
+            display: inline-block;
+            border: 1px solid #333;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 8px;
+            font-weight: 800;
+            color: var(--structural-red);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: var(--structural-red-dim);
+            margin-bottom: 15px;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-box {
+            background: #000;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 25px;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .btn-action {
+            background-color: var(--structural-red);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 2px;
+            transition: all 0.4s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-action:hover {
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .scenario-card {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            padding: 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .scenario-card:hover {
+            border-color: var(--structural-red);
+            background: #0f0f0f;
+            transform: scale(1.02);
+        }
+
+        /* --- FOOTER BLINDADO --- */
+        .footer-blindado {
+            position: absolute;
+            bottom: 40px;
+            left: 100px;
+            right: 100px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #333;
+            font-family: 'Montserrat';
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .hidden { display: none; }
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- PHONETIC INPUT UI --- */
+        .phonetic-input-group {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .ipa-clue {
+            background: #111;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: var(--structural-red);
+            font-weight: 700;
+            font-size: 18px;
+            min-width: 120px;
+            text-align: center;
+            border: 1px solid #222;
+        }
+
+        .debug-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #222;
+            padding: 10px 0;
+            font-family: 'Fira Code', monospace;
+            color: #fff;
+            outline: none;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .debug-input:focus {
+            border-bottom-color: var(--structural-red);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="flex h-screen w-full overflow-hidden">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar shrink-0">
+            <div class="mb-14">
+                <h2 class="font-display text-2xl tracking-tighter text-white">WOLF<span class="text-[#e74c3c]">LABS</span></h2>
+                <div class="h-[1px] w-6 bg-[#e74c3c] mt-2"></div>
+                <p class="text-[8px] text-gray-600 uppercase tracking-[4px] mt-4">Structural OS v2.0</p>
+            </div>
+
+            <nav class="flex-grow">
+                <div class="nav-item active" data-tab="overview" onclick="switchTab('overview')">
+                    <i class="fa-solid fa-grid-2"></i> System Overview
+                </div>
+                <div class="nav-item" data-tab="spelling" onclick="switchTab('spelling')">
+                    <i class="fa-solid fa-microchip"></i> Spelling Debugger
+                </div>
+                <div class="nav-item" data-tab="passive" onclick="switchTab('passive')">
+                    <i class="fa-solid fa-arrows-spin"></i> Passive Transmuter
+                </div>
+                <div class="nav-item" data-tab="situations" onclick="switchTab('situations')">
+                    <i class="fa-solid fa-radar"></i> Situation Room
+                </div>
+                <div class="nav-item" data-tab="speaking" onclick="switchTab('speaking')">
+                    <i class="fa-solid fa-waveform-lines"></i> Speaking Deck
+                </div>
+            </nav>
+
+            <div class="mt-auto">
+                <div class="glass-card !p-4 border-[#e74c3c22]">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[9px] text-gray-500 uppercase font-bold text-center w-full">B1 Structural Red</span>
+                    </div>
+                    <div class="h-1 w-full bg-[#111] mt-2 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#e74c3c]" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEWPORT -->
+        <main class="main-viewport">
+            <div class="content-scrollable" id="app-container">
+                
+                <!-- VIEW: OVERVIEW -->
+                <section id="view-overview" class="fade-in">
+                    <div class="pill">Structural Series // B1</div>
+                    <h1 class="font-display text-6xl mb-6">The English <br><span class="text-[#e74c3c]">Spelling Mystery</span></h1>
+                    <p class="text-gray-400 max-w-xl text-lg mb-12 leading-relaxed">
+                        Deconstruct the phonetic chaos. Master executive precision by shifting focus from the executor to the result.
+                    </p>
+
+                    <div class="grid grid-cols-3 gap-6 mb-12">
+                        <div class="glass-card">
+                            <h4 class="text-[10px] text-[#e74c3c] font-bold uppercase mb-4 tracking-widest">Target 01</h4>
+                            <p class="text-white font-bold mb-2">Phonetic Logic</p>
+                            <p class="text-xs text-gray-500 leading-relaxed">Decode silent letters and historical anomalies.</p>
+                        </div>
+                        <div class="glass-card">
+                            <h4 class="text-[10px] text-[#e74c3c] font-bold uppercase mb-4 tracking-widest">Target 02</h4>
+                            <p class="text-white font-bold mb-2">Passive Voice</p>
+                            <p class="text-xs text-gray-500 leading-relaxed">Formalize reporting and objective data delivery.</p>
+                        </div>
+                        <div class="glass-card">
+                            <h4 class="text-[10px] text-[#e74c3c] font-bold uppercase mb-4 tracking-widest">Target 03</h4>
+                            <p class="text-white font-bold mb-2">Executive Flow</p>
+                            <p class="text-xs text-gray-500 leading-relaxed">High-level debate protocol for senior roles.</p>
+                        </div>
+                    </div>
+
+                    <button class="btn-action" onclick="switchTab('spelling')">Initialize System</button>
+                </section>
+
+                <!-- VIEW: SPELLING DEBUGGER -->
+                <section id="view-spelling" class="fade-in hidden">
+                    <div class="pill">Module 01 // IPA De-obfuscation</div>
+                    <h2 class="font-display mb-10">PHONETIC <span class="text-[#e74c3c]">DEBUGGER</span></h2>
+                    
+                    <div class="glass-card mb-8">
+                        <p class="text-gray-500 mb-8 font-mono text-sm">// Decoding audible signals to structural spelling:</p>
+                        
+                        <!-- Challenge 1 -->
+                        <div class="phonetic-input-group">
+                            <div class="ipa-clue">/naɪt/</div>
+                            <div class="flex-grow">
+                                <span class="text-[9px] text-gray-500 uppercase tracking-widest block mb-1">Clue: Noun (Medieval Warrior)</span>
+                                <input type="text" id="spell1" class="debug-input" placeholder="root@wolf: type_here > _">
+                            </div>
+                        </div>
+
+                        <!-- Challenge 2 -->
+                        <div class="phonetic-input-group">
+                            <div class="ipa-clue">/saɪˈkɒlədʒi/</div>
+                            <div class="flex-grow">
+                                <span class="text-[9px] text-gray-500 uppercase tracking-widest block mb-1">Clue: Noun (Study of Mind)</span>
+                                <input type="text" id="spell2" class="debug-input" placeholder="root@wolf: type_here > _">
+                            </div>
+                        </div>
+
+                        <!-- Challenge 3 -->
+                        <div class="phonetic-input-group">
+                            <div class="ipa-clue">/thɔːt/</div>
+                            <div class="flex-grow">
+                                <span class="text-[9px] text-gray-500 uppercase tracking-widest block mb-1">Clue: Verb (Past of Think)</span>
+                                <input type="text" id="spell3" class="debug-input" placeholder="root@wolf: type_here > _">
+                            </div>
+                        </div>
+
+                        <button class="btn-action mt-6" onclick="verifySpelling()">Compile Data</button>
+                    </div>
+                    <div id="spelling-result" class="font-mono text-[11px] uppercase tracking-widest text-center"></div>
+                </section>
+
+                <!-- VIEW: PASSIVE TRANSMUTER -->
+                <section id="view-passive" class="fade-in hidden">
+                    <div class="pill">Module 02 // Structure Transmutation</div>
+                    <h2 class="font-display mb-10">EXECUTIVE <span class="text-[#e74c3c]">POLISH</span></h2>
+
+                    <div class="glass-card border-l-4 border-l-[#e74c3c]">
+                        <div class="flex items-center gap-4 mb-8">
+                            <span class="text-[10px] text-[#e74c3c] font-bold uppercase tracking-widest bg-red-950/30 px-3 py-1 rounded">Active Input</span>
+                            <p class="text-lg text-white font-medium italic">"Someone leaked the quarterly results to the board prematurely."</p>
+                        </div>
+                        
+                        <div class="relative py-8 text-center">
+                            <div class="h-[1px] w-full bg-[#1a1a1a]"></div>
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#050505] px-4">
+                                <i class="fa-solid fa-arrows-spin text-[#e74c3c] animate-spin-slow"></i>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <span class="text-[10px] text-gray-500 uppercase tracking-widest">Passive Output (Objective Target)</span>
+                            <textarea id="passive-input" class="w-full bg-[#0a0a0a] border border-[#222] rounded-lg p-6 font-mono text-[#e74c3c] outline-none focus:border-[#e74c3c] h-32" placeholder="The quarterly results..."></textarea>
+                            <button class="btn-action" onclick="verifyPassive()">Submit to Audit</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: SITUATION ROOM -->
+                <section id="view-situations" class="fade-in hidden">
+                    <div class="pill">Module 03 // Tactical Dialogue</div>
+                    <h2 class="font-display mb-10">THE CRISIS <span class="text-[#e74c3c]">ROOM</span></h2>
+                    <p class="text-gray-500 mb-10">Select an operational failure. Report it formally without assigning individual blame.</p>
+                    
+                    <div class="situation-grid">
+                        <div class="scenario-card" onclick="openSituation('Security Breach', 'The junior dev left the AWS keys in a public repo.')">
+                            <i class="fa-solid fa-shield-virus text-[#e74c3c] text-2xl mb-4"></i>
+                            <h4 class="font-bold text-white mb-2 uppercase">Security Breach</h4>
+                            <p class="text-xs text-gray-500 uppercase tracking-widest font-bold mt-2">Level: Critical</p>
+                        </div>
+                        <div class="scenario-card" onclick="openSituation('Delayed Milestone', 'The logistics partner missed the delivery window.')">
+                            <i class="fa-solid fa-clock-rotate-left text-[#e74c3c] text-2xl mb-4"></i>
+                            <h4 class="font-bold text-white mb-2 uppercase">Delayed Milestone</h4>
+                            <p class="text-xs text-gray-500 uppercase tracking-widest font-bold mt-2">Level: Warning</p>
+                        </div>
+                        <div class="scenario-card" onclick="openSituation('Budget Variance', 'Marketing team exceeded the spending limit.')">
+                            <i class="fa-solid fa-coins text-[#e74c3c] text-2xl mb-4"></i>
+                            <h4 class="font-bold text-white mb-2 uppercase">Budget Variance</h4>
+                            <p class="text-xs text-gray-500 uppercase tracking-widest font-bold mt-2">Level: Review</p>
+                        </div>
+                    </div>
+
+                    <div id="situation-modal" class="hidden glass-card mt-10 border-[#e74c3c]/30">
+                        <div class="flex justify-between items-start mb-6">
+                            <h3 id="sit-title" class="font-display text-2xl text-white"></h3>
+                            <button onclick="closeSituation()" class="text-gray-600 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <p class="text-gray-400 mb-8 font-mono text-sm" id="sit-desc"></p>
+                        <div class="bg-black p-6 rounded-lg border-l-2 border-[#e74c3c]">
+                            <span class="text-[10px] text-[#e74c3c] font-bold uppercase block mb-2">Protocol: Passive Transformation</span>
+                            <p class="italic text-lg text-white">"Report the incident focused on the action, not the person."</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: SPEAKING HUB -->
+                <section id="view-speaking" class="fade-in hidden">
+                    <div class="pill">Module 04 // Fluency Sync</div>
+                    <h2 class="font-display mb-10">THE SPEAKING <span class="text-[#e74c3c]">HUB</span></h2>
+
+                    <div class="glass-card text-center py-20 flex flex-col items-center">
+                        <div class="w-20 h-20 rounded-full border-2 border-[#e74c3c] flex items-center justify-center mb-10">
+                            <i class="fa-solid fa-waveform-lines text-3xl text-[#e74c3c] animate-pulse"></i>
+                        </div>
+                        <h3 id="speaking-prompt" class="text-3xl font-bold text-white max-w-2xl leading-tight mb-12 italic">"Why do you think English spelling became so progressively disconnected from phonetics?"</h3>
+                        
+                        <div class="flex gap-4">
+                            <button class="btn-action bg-[#111] hover:bg-[#222]" onclick="nextPrompt()">Next Scenario</button>
+                            <button class="btn-action" id="mic-trigger" onclick="simulateMic()">Sync Voice Data</button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- FOOTER BLINDADO -->
+            <footer class="footer-blindado">
+                <div>WOLF LABS XOS // B1 STRUCTURAL</div>
+                <div class="text-[#e74c3c] font-black">XOS-B1-RED.SYS</div>
+                <div>GITHUB // REPOSITORY: XOS-B1-RED</div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            const sections = document.querySelectorAll('main section');
+            sections.forEach(s => s.classList.add('hidden'));
+            document.getElementById('view-' + tabId).classList.remove('hidden');
+
+            const items = document.querySelectorAll('.nav-item');
+            items.forEach(i => i.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+
+            if(tabId !== 'situations') closeSituation();
+        }
+
+        function verifySpelling() {
+            const s1 = document.getElementById('spell1').value.trim().toLowerCase();
+            const s2 = document.getElementById('spell2').value.trim().toLowerCase();
+            const s3 = document.getElementById('spell3').value.trim().toLowerCase();
+            const res = document.getElementById('spelling-result');
+
+            if (s1 === 'knight' && s2 === 'psychology' && s3 === 'thought') {
+                res.innerHTML = "<span class='text-green-500'>[SYSTEM_CHECK: OK] Integrity Verified. All strings match.</span>";
+            } else {
+                res.innerHTML = "<span class='text-[#e74c3c]'>[COMPILE_ERROR] Mismatch in structural strings. Re-decode IPA.</span>";
+            }
+        }
+
+        function verifyPassive() {
+            const input = document.getElementById('passive-input').value.trim().toLowerCase();
+            const target = document.getElementById('view-passive');
+            const alert = (msg, color) => {
+                const out = document.createElement('div');
+                out.className = `mt-4 font-mono text-[10px] text-${color}-500 text-center`;
+                out.innerText = msg;
+                target.appendChild(out);
+                setTimeout(() => out.remove(), 4000);
+            };
+
+            if (input.includes('were leaked') || input.includes('have been leaked')) {
+                alert("[POLISH_SUCCESS] Structural focus shifted to result.", "green");
+            } else {
+                alert("[VALIDATION_FAILURE] Missing auxiliary 'be' or past participle.", "red");
+            }
+        }
+
+        function openSituation(title, desc) {
+            const modal = document.getElementById('situation-modal');
+            modal.classList.remove('hidden');
+            document.getElementById('sit-title').innerText = title;
+            document.getElementById('sit-desc').innerText = `SYSTEM_LOG: ${desc}`;
+            modal.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeSituation() {
+            document.getElementById('situation-modal').classList.add('hidden');
+        }
+
+        const prompts = [
+            "Why do you think English spelling became so progressively disconnected from phonetics?",
+            "Although English is difficult to write, do you agree that it is easy to speak?",
+            "What professional goal was progressively achieved by you this year?",
+            "Is the Passive Voice necessarily a sign of formal writing, or just avoiding responsibility?"
+        ];
+        let currentP = 0;
+
+        function nextPrompt() {
+            currentP = (currentP + 1) % prompts.length;
+            document.getElementById('speaking-prompt').innerText = `"${prompts[currentP]}"`;
+        }
+
+        function simulateMic() {
+            const btn = document.getElementById('mic-trigger');
+            btn.innerText = "Listening...";
+            btn.classList.add('animate-pulse');
+            setTimeout(() => {
+                btn.innerText = "Data Synced";
+                btn.classList.remove('animate-pulse');
+                setTimeout(() => btn.innerText = "Sync Voice Data", 2000);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
